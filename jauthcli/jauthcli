@@ -3,42 +3,39 @@ set -e
 
 helpstr="\
 NAME
-	jauthcli - run the JAuth command line interface
+    jauthcli - run the JAuth command line interface
 
 SYNOPSIS
-	jauthcli [--new-window] [SECRET_FILE]
+    jauthcli [--new-window] [SECRET_FILE]
 
 DESCRIPTION
-	SECRET_FILE should be a text file where the first line is the secret key.  
-	The default is ~/.s.
-	
-	The java that this script runs needs to know where the JAuthCLI package is.
-	By default, the JAuthCLI directory is a sibling to this script.  Therefore, 
-	if no CLASSPATH is set, and there is indeed a JAuthCLI directory next to 
-	this script, the parent directory of this script is put in CLASSPATH, and 
-	it'll just work.  In all other cases (such as if you move the java code and 
-	shell script to two different places), put the directory containing the 
-	JAuthCLI directory in the CLASSPATH environment variable before running 
-	this.
+    SECRET_FILE should be a text file where the first line is the secret key.  
+    The default is ~/.s.
+
+    This needs the JAuthCLI package in order to run.  By default, that 
+    directory is a sibling of this script, and the parent directory is 
+    automatically added to CLASSPATH.  If you have split this shell script and 
+    the java code to two different places, you must set CLASSPATH appropriately 
+    before running this script.
 
 OPTIONS
-	-h, --help
-		Print this help.
-	
-	--new-window
-		Launch it in a new xterm.
+    -h, --help
+        Print this help.
+    
+    --new-window
+        Launch it in a new xterm.
 
 REQUIREMENTS
-	Java, probably >= 1.6.
+    Java, probably >= 1.6.
 
-	JAuthCLI is self-contained code, derived from a previous incarnation of 
-	JAuth.  It does not require the current JAuth code.
+    JAuthCLI is self-contained code, derived from a previous incarnation of 
+    JAuth.  It does not require the current JAuth code.
 
 AUTHOR
-	John Brunelle
-	Harvard FAS Research Computing
+    John Brunelle
+    Harvard FAS Research Computing
 
-	JAuth from https://github.com/fasrc/JAuth
+    JAuth from https://github.com/fasrc/JAuth
 "
 
 new_window=false
@@ -74,7 +71,7 @@ if ! [ -r "$secret_file" ]; then
 fi
 
 parentd="$(dirname "$0")"
-test -z "$CLASSPATH" && test -d "$parentd"/JAuthCLI && export CLASSPATH="$parentd"
+test -d "$parentd"/JAuthCLI && export CLASSPATH="$parentd:$CLASSPATH"
 
 set -u
 
@@ -83,6 +80,8 @@ set -u
 
 
 prefix=''
-$new_window && prefix='xterm -geometry 39x5+16+14 -e'
+$new_window && prefix='xterm -geometry 39x5+16+14 -title jauthcli -e'
+
+echo $CLASSPATH
 
 $prefix java JAuthCLI.Main "$secret_file"
