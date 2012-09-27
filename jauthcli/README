@@ -1,0 +1,20 @@
+jauthcli -- JAuth Command Line Interface
+
+JAuthCLI is self-contained code, derived from a previous incarnation of 
+JAuth.  It does not require the current JAuth code.
+
+Building
+--------
+
+In this directory, run:
+
+    javac -classpath ./ JAuthCLI/*.java
+
+Running
+-------
+
+Create a file ~/.s containing your secret key, and run:
+
+    ./jauthcli
+
+See ./jauthcli --help for more options.

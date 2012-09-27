@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+set -e
+
+helpstr="\
+NAME
+	jauthcli - run the JAuth command line interface
+
+SYNOPSIS
+	jauthcli [--new-window] [SECRET_FILE]
+
+DESCRIPTION
+	SECRET_FILE should be a text file where the first line is the secret key.  
+	The default is ~/.s.
+	
+	The java that this script runs needs to know where the JAuthCLI package is.
+	By default, the JAuthCLI directory is a sibling to this script.  Therefore, 
+	if no CLASSPATH is set, and there is indeed a JAuthCLI directory next to 
+	this script, the parent directory of this script is put in CLASSPATH, and 
+	it'll just work.  In all other cases (such as if you move the java code and 
+	shell script to two different places), put the directory containing the 
+	JAuthCLI directory in the CLASSPATH environment variable before running 
+	this.
+
+OPTIONS
+	-h, --help
+		Print this help.
+	
+	--new-window
+		Launch it in a new xterm.
+
+REQUIREMENTS
+	Java, probably >= 1.6.
+
+	JAuthCLI is self-contained code, derived from a previous incarnation of 
+	JAuth.  It does not require the current JAuth code.
+
+AUTHOR
+	John Brunelle
+	Harvard FAS Research Computing
+
+	JAuth from https://github.com/fasrc/JAuth
+"
+
+new_window=false
+
+args=$(getopt -l new-window,help -o h -- "$@")
+if [ $? -ne 0 ]; then
+	exit 65  #(getopt will have written the error message)
+fi
+eval set -- "$args"
+while [ ! -z "$1" ]; do
+	case "$1" in
+		--new-window)
+			new_window=true
+			;;
+
+		-h | --help)
+			echo -n "$helpstr"
+			exit 0
+			;;
+		--) 
+			shift
+			break
+			;;
+	esac
+	shift
+done
+
+secret_file="$1"
+test -z "$secret_file" && secret_file=~/.s
+if ! [ -r "$secret_file" ]; then
+	echo "*** ERROR *** secret key file [$secret_file] does not exist or is not readable" >&2
+	exit 1
+fi
+
+parentd="$(dirname "$0")"
+test -z "$CLASSPATH" && test -d "$parentd"/JAuthCLI && export CLASSPATH="$parentd"
+
+set -u
+
+
+#---
+
+
+prefix=''
+$new_window && prefix='xterm -geometry 39x5+16+14 -e'
+
+$prefix java JAuthCLI.Main "$secret_file"
