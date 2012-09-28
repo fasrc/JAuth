@@ -82,6 +82,4 @@ set -u
 prefix=''
 $new_window && prefix='xterm -geometry 39x5+16+14 -title jauthcli -e'
 
-echo $CLASSPATH
-
 $prefix java JAuthCLI.Main "$secret_file"
