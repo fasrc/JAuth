@@ -391,7 +391,9 @@ public final class AuthenticatorGUI extends JPanel implements ActionListener, Mo
       image       = ImageIO.read(imagestream);
       icon        = ImageIO.read(iconstream);
 
-      secret      = AuthenticatorGUI.getSecret(args,new ImageIcon(icon));
+      if (secret=="") {
+            secret = AuthenticatorGUI.getSecret(args,new ImageIcon(icon));
+      }
 
       //JOptionPane.showMessageDialog(null, "Secret is " + secret);
 
