@@ -6,7 +6,9 @@ import javax.crypto.spec.SecretKeySpec;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.io.*;
+import java.util.Date;
 import java.util.Calendar;
+import java.text.SimpleDateFormat;
 
 
 // read ~/.google-authenticator
@@ -22,29 +24,47 @@ public class Main {
        System.out.println("");
      }
    });
-   System.out.println(":----------------------------:--------:");
-   System.out.println(":       Code Wait Time       :  Code  :");
-   System.out.println(":----------------------------:--------:");
    Main main = new Main();
+   
    String inFile=args[0];
+
+   //undocumented cli option for adding timestamp to output lines
+   boolean addtimestamp = false;
+   if(args.length>1){
+      addtimestamp = true;
+   }
+   
    try {
    RandomAccessFile raf= new RandomAccessFile(inFile,"r");
    FileReader fileReader = new FileReader(raf.getFD());
    BufferedReader bufReader  = new LineNumberReader(fileReader,65536);
-   main.reminder(bufReader.readLine()); 
+   main.reminder(bufReader.readLine(),addtimestamp); 
    }
    catch (IOException e){
     e.printStackTrace();
    }
+   
+   if(addtimestamp){
+      //                                                          2012-11-24 11:26:36 EST
+      System.out.println(":----------------------------:--------:-------------------------:");
+      System.out.println(":       Code Wait Time       :  Code  :          Time           :");
+      System.out.println(":----------------------------:--------:-------------------------:");
+   }else{
+      System.out.println(":----------------------------:--------:");
+      System.out.println(":       Code Wait Time       :  Code  :");
+      System.out.println(":----------------------------:--------:");
+   }
  }
- public void reminder(String secret) {
+ public void reminder(String secret, boolean addtimestamp) {
    timer = new Timer();
-   timer.scheduleAtFixedRate(new TimedPin(secret), 0, 1 * 1000);
+   timer.scheduleAtFixedRate(new TimedPin(secret,addtimestamp), 0, 1 * 1000);
  }
  class TimedPin extends TimerTask {
-    private String secret; 
-    public TimedPin (String secret){
+    private String secret;
+	private boolean addtimestamp = false;
+    public TimedPin (String secret, boolean addtimestamp){
       this.secret=secret;
+	  this.addtimestamp=addtimestamp;
     }
     String previouscode="";
 	int numdots=0;  //there are timing issues on slower computers, still need to count dots rather than deduce from the system clock
@@ -63,7 +83,17 @@ public class Main {
               System.out.print(".");
             }
           }
-          System.out.println(": "+ newout + " :");
+          System.out.print(": "+ newout + " :");
+		  if(this.addtimestamp){
+		     Date d = new Date();
+			 if(previouscode.equals("")){
+			    System.out.print("           n/a           :");
+			 }else{
+			    SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z ':'");
+			    System.out.print(" " + f.format(d));
+			 }
+		  }
+		  System.out.print("\n");
 		  numdots = 0;
           if(previouscode.equals("")){
             //print "."s for progress already made towards the second code (new codes happen at :00 and :30 seconds on the system clock)
