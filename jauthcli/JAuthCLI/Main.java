@@ -47,10 +47,14 @@ public class Main {
       this.secret=secret;
     }
     String previouscode="";
+	int numdots=0;  //there are timing issues on slower computers, still need to count dots rather than deduce from the system clock
     public void run() {
         String newout = Main.computePin(secret,null);
         if(previouscode.equals(newout)){
-           System.out.print("."); 
+           if(numdots<29){
+		      System.out.print("."); 
+			  numdots++;
+		   }
         } 
         else {
           if(previouscode.equals("")){
@@ -60,10 +64,12 @@ public class Main {
             }
           }
           System.out.println(": "+ newout + " :");
+		  numdots = 0;
           if(previouscode.equals("")){
             //print "."s for progress already made towards the second code (new codes happen at :00 and :30 seconds on the system clock)
             for (int i=0; i<Calendar.getInstance().get(Calendar.SECOND)%30; i++){
               System.out.print(".");
+			  numdots++;
             }
           }
         }
